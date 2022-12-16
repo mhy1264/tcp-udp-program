@@ -41,12 +41,10 @@ int main(int argc, char** argv){
 	Frame frame_send;	
 
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-	cout <<"a"<<endl;
 	memset(&serverAddr, '\0', sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(port);
-	serverAddr.sin_addr.s_addr = inet_addr("192.168.1.112");
-	cout <<"b"<<endl;
+	serverAddr.sin_addr.s_addr = inet_addr(SERVER);
 	bind(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
 	addr_size = sizeof(newAddr);
 
@@ -55,9 +53,14 @@ int main(int argc, char** argv){
 		if (f_recv_size > 0 && frame_recv.frame_kind == 1 && frame_recv.sq_no == frame_id){
 			printf("[+]Frame Received: %s\n", frame_recv.packet.data);
 			
+			char buff[1024]="return from server ";
+			strncat(buff,frame_recv.packet.data,sizeof(frame_recv.packet.data));
+			copy(buff,buff+sizeof(buff),frame_send.packet.data);
+
 			frame_send.sq_no = 0;
 			frame_send.frame_kind = 0;
 			frame_send.ack = frame_recv.sq_no + 1;
+
 			sendto(sockfd, &frame_send, sizeof(frame_send), 0, (struct sockaddr*)&newAddr, addr_size);
 			printf("[+]Ack Send\n");
 		}else{

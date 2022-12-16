@@ -44,7 +44,7 @@ int main(int argc, char **argv){
 	memset(&serverAddr, '\0', sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(port);
-	serverAddr.sin_addr.s_addr = inet_addr();
+	serverAddr.sin_addr.s_addr = inet_addr(SERVER);
 	
 	while(1){
 		
@@ -59,10 +59,10 @@ int main(int argc, char **argv){
 			sendto(sockfd, &frame_send, sizeof(Frame), 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
 			printf("[+]Frame Send\n");
 		}
-		auto addr_size =(unsigned int*)(sizeof(serverAddr));
-		int f_recv_size = recvfrom(sockfd, &frame_recv, sizeof(frame_recv), 0 ,(struct sockaddr*)&serverAddr,addr_size);
 		
-		if( f_recv_size > 0 && frame_recv.sq_no == 0 && frame_recv.ack == frame_id+1){
+		auto addr_size =(unsigned int*)(sizeof(serverAddr));
+		recvfrom(sockfd, &frame_recv, sizeof(frame_recv), 0 ,(struct sockaddr*)&serverAddr,addr_size);
+		if( sizeof(frame_recv.packet.data) > 0 && frame_recv.sq_no == 0 && frame_recv.ack == frame_id+1){
 			printf("[+]Ack Received\n");
 			ack_recv = 1;
 		}else{
